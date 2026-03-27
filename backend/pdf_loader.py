@@ -1,3 +1,6 @@
+import os
+
+from langchain_community import embeddings
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
@@ -31,16 +34,30 @@ def build_qa_chain():
     # Vector DB
     vectorStore = FAISS.from_documents(chunks, embeddings)
     print("Vector Store Created")
-
     retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
 
+    vectorStore.save_local("faiss_index")
+    import os
+    if os.path.exists("faiss_index"):
+        print("Loading existing FAISS index...")
+        # Add the flag here:
+        vectorStore = FAISS.load_local(
+            "faiss_index", 
+            embeddings, 
+            allow_dangerous_deserialization=True
+        )
+    else:
+        print("Creating new FAISS index...")
+        vectorStore = FAISS.from_documents(chunks, embeddings)
+        vectorStore.save_local("faiss_index")
     # LLM
     llm = Ollama(model="llama3")
 
     # RAG chain
     query_chain = RetrievalQA.from_chain_type(
         llm=llm,
-        retriever=retriever
+        retriever=retriever,
+        return_source_documents=True
     )
 
     return query_chain
