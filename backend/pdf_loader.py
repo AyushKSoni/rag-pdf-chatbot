@@ -32,24 +32,44 @@ def build_qa_chain():
     )
 
     # Vector DB
-    vectorStore = FAISS.from_documents(chunks, embeddings)
-    print("Vector Store Created")
-    retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
+    # vectorStore = FAISS.from_documents(chunks, embeddings)
+    # print("Vector Store Created")
+    # retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
 
-    vectorStore.save_local("faiss_index")
-    import os
+    # vectorStore.save_local("faiss_index")
+    # import os
+    # if os.path.exists("faiss_index"):
+    #     print("Loading existing FAISS index...")
+    #     # Add the flag here:
+    #     vectorStore = FAISS.load_local(
+    #         "faiss_index", 
+    #         embeddings, 
+    #         allow_dangerous_deserialization=True
+    #     )
+    # else:
+    #     print("Creating new FAISS index...")
+    #     vectorStore = FAISS.from_documents(chunks, embeddings)
+    #     vectorStore.save_local("faiss_index")
+    
+    
+    
+    
+    # Check if index exists
     if os.path.exists("faiss_index"):
         print("Loading existing FAISS index...")
-        # Add the flag here:
         vectorStore = FAISS.load_local(
-            "faiss_index", 
-            embeddings, 
+            "faiss_index",
+            embeddings,
             allow_dangerous_deserialization=True
         )
     else:
         print("Creating new FAISS index...")
         vectorStore = FAISS.from_documents(chunks, embeddings)
         vectorStore.save_local("faiss_index")
+
+    # NOW create retriever (after vectorStore is final)
+    retriever = vectorStore.as_retriever(search_kwargs={"k": 3})
+    
     # LLM
     llm = Ollama(model="llama3")
 
