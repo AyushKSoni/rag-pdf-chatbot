@@ -16,7 +16,7 @@ async function ask() {
 
     if (data.answer) {
       chatbox.innerHTML += `<div class="bot-message">${data.answer}</div>`;
-    } else {
+    } else {z
       chatbox.innerHTML += `<div class="bot-message">Sorry, I couldn't find an answer. ${data.error}</div>`;
     }
   } catch (err) {

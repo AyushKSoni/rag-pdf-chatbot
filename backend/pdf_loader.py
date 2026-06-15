@@ -7,6 +7,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain_community.llms import Ollama
+from langchain.prompts import PromptTemplate
 
 
 def build_qa_chain():
@@ -72,12 +73,38 @@ def build_qa_chain():
     
     # LLM
     llm = Ollama(model="llama3")
+    
+    # prompt template
+    prompt_template = """
+    You are a helpful assistant answering questions from a PDF document.
+
+    Use only the provided context to answer.
+
+    If the answer is not present in the context, say:
+    "I could not find that information in the PDF."
+
+    Context:
+    {context}
+
+    Question:
+    {question}
+
+    Answer:
+    """
+
+    PROMPT = PromptTemplate(
+        template=prompt_template,
+        input_variables=["context", "question"]
+    )
 
     # RAG chain
     query_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,
         return_source_documents=True
+    #     chain_type_kwargs={
+    #     "prompt": prompt
+    # }
     )
 
     return query_chain
